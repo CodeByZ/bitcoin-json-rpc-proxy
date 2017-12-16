@@ -16,7 +16,7 @@ let client = null;
 //     "password": "rpc##PA%%wo1D"
 // }
 
-function connect(host: string, port: number, username: string, password: string): Promise<boolean> {
+function connect(host: string, port: number, username: string, password: string): Promise<string> {
 
     let clientConn = new Client({
         network: 'mainnet',
@@ -35,10 +35,10 @@ function connect(host: string, port: number, username: string, password: string)
             .then(() => {
                 client = clientConn;
                 isConnected = true;
-                resolve();
+                resolve('Welcome to the blockchain. Vires in numeris');
             })
             .catch(err => {
-                reject();
+                reject(err);
             });
     });
 }
@@ -71,11 +71,11 @@ const router = express.Router();
 router.post('/connect', (req, res) => {
     let {host, port, username, password} = req.body;
     connect(host, port, username, password)
-        .then(() => {
-            res.json({connected: true});
+        .then(message => {
+            res.json({connected: true, message});
         })
-        .catch(() => {
-            res.status(401).json({connected: false});
+        .catch(error => {
+            res.status(401).json({connected: false, error});
         });
 });
 
