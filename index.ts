@@ -3,6 +3,9 @@ const bodyParser = require('body-parser');
 const Client = require('bitcoin-core');
 
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
 
 const port = process.env.PORT || 8080;
 const BASE_HREF = '/api';
