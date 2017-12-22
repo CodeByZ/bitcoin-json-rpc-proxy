@@ -101,7 +101,7 @@ router.post('/connect', (req, res) => {
         });
 });
 
-router.post('/disconnect', (req, res) => {
+router.get('/disconnect', (req, res) => {
     disconnect()
         .then(message => {
             res.status(200).json({connected: false, message});
