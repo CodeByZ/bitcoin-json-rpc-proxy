@@ -5,6 +5,8 @@ const Client = require('bitcoin-core');
 const app = express();
 const cors = require('cors');
 
+const WELCOME_MESSAGE: string = 'Welcome to the blockchain. Vires in numeris';
+
 app.use(cors());
 
 const port = process.env.PORT || 8080;
@@ -20,7 +22,19 @@ let client = null;
 //     "password": "rpc##PA%%wo1D"
 // }
 
+function disconnect(): Promise<void> {
+
+    client = null;
+    isConnected = false;
+
+    return Promise.resolve();
+}
+
 function connect(host: string, port: number, username: string, password: string): Promise<string> {
+
+    if (isConnected) {
+        return Promise.resolve(WELCOME_MESSAGE);
+    }
 
     let clientConn = new Client({
         network: 'mainnet',
@@ -34,12 +48,12 @@ function connect(host: string, port: number, username: string, password: string)
         }
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
         clientConn.getBlockchainInfo()
             .then(() => {
                 client = clientConn;
                 isConnected = true;
-                resolve('Welcome to the blockchain. Vires in numeris');
+                resolve(WELCOME_MESSAGE);
             })
             .catch(err => {
                 reject(err);
@@ -58,8 +72,8 @@ app.use(function (err, req, res, next) {
     res.status(500).send('Error: ' + err.message);
 });
 
-app.use('/health', (req, res) => {
-    res.json({alive: true});
+app.use('/api/health', (req, res) => {
+    res.status(200).json({healthy: true});
 });
 
 // check if we're connected (middleware)
@@ -80,23 +94,33 @@ router.post('/connect', (req, res) => {
     let {host, port, username, password} = req.body;
     connect(host, port, username, password)
         .then(message => {
-            res.json({connected: true, message});
+            res.status(200).json({connected: true, message});
         })
         .catch(error => {
             res.status(401).json({connected: false, error});
         });
 });
 
+router.post('/disconnect', (req, res) => {
+    disconnect()
+        .then(message => {
+            res.status(200).json({connected: false, message});
+        })
+        .catch(error => {
+            res.status(500).json({connected: false, error});
+        });
+});
+
 router.get('/get-blockchain-info', (req, res) => {
     client.getBlockchainInfo().then(info => {
-        res.json(info);
+        res.status(200).json(info);
     });
 });
 
 router.get('/get-block/:blockhash', (req, res) => {
     client.getBlock(req.params.blockhash, true)
         .then(data => {
-            res.json(data);
+            res.status(200).json(data);
         })
         .catch(error => {
             res.status(400).json({error});
@@ -106,7 +130,7 @@ router.get('/get-block/:blockhash', (req, res) => {
 router.get('/get-received-by-address/:address', (req, res) => {
     client.getReceivedByAddress(req.params.address, true)
         .then(data => {
-            res.json(data);
+            res.status(200).json(data);
         })
         .catch(error => {
             res.status(400).json({error});
@@ -117,7 +141,7 @@ router.get('/get-received-by-address/:address', (req, res) => {
 router.get('/get-block-count', (req, res) => {
     client.getBlockCount()
         .then(data => {
-            res.json(data);
+            res.status(200).json(data);
         })
         .catch(error => {
             res.status(400).json({error});
@@ -127,7 +151,7 @@ router.get('/get-block-count', (req, res) => {
 router.get('/get-raw-transaction/:txid', (req, res) => {
     client.getRawTransaction(req.params.txid, true)
         .then(data => {
-            res.json(data);
+            res.status(200).json(data);
         })
         .catch(error => {
             res.status(400).json({error});
