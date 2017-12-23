@@ -82,7 +82,7 @@ app.use((req, res, next) => {
         next();
     }
     else {
-        res.status(401).send('Please connect first');
+        res.status(401).json({message: 'Please connect first'});
     }
 });
 
@@ -94,20 +94,30 @@ router.post('/connect', (req, res) => {
     let {host, port, username, password} = req.body;
     connect(host, port, username, password)
         .then(message => {
-            res.status(200).json({connected: true, message});
+            res.status(200).json({message});
         })
         .catch(error => {
-            res.status(401).json({connected: false, error});
+            const errCode = error.cause.code;
+            let message = '';
+            if (errCode === 'ECONNRESET') {
+                message = 'Couldn\'t establish connection. Is your full node running?';
+            } else if (errCode === 'EHOSTUNREACH') {
+                message = 'Host unreachable. Check your internet connection';
+            }
+            else {
+                message = errCode;
+            }
+            res.status(401).json({message});
         });
 });
 
 router.get('/disconnect', (req, res) => {
     disconnect()
         .then(message => {
-            res.status(200).json({connected: false, message});
+            res.status(200).json({message});
         })
         .catch(error => {
-            res.status(500).json({connected: false, error});
+            res.status(500).json(error);
         });
 });
 
@@ -123,7 +133,7 @@ router.get('/get-block/:blockhash', (req, res) => {
             res.status(200).json(data);
         })
         .catch(error => {
-            res.status(400).json({error});
+            res.status(400).json(error);
         })
 });
 
@@ -133,7 +143,7 @@ router.get('/get-received-by-address/:address', (req, res) => {
             res.status(200).json(data);
         })
         .catch(error => {
-            res.status(400).json({error});
+            res.status(400).json(error);
         })
 });
 
@@ -144,7 +154,7 @@ router.get('/get-block-count', (req, res) => {
             res.status(200).json(data);
         })
         .catch(error => {
-            res.status(400).json({error});
+            res.status(400).json(error);
         })
 });
 
@@ -154,7 +164,7 @@ router.get('/get-raw-transaction/:txid', (req, res) => {
             res.status(200).json(data);
         })
         .catch(error => {
-            res.status(400).json({error});
+            res.status(400).json(error);
         })
 });
 
