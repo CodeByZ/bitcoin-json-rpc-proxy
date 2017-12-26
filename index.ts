@@ -15,6 +15,8 @@ const BASE_HREF = '/api';
 let isConnected: boolean = false;
 let client = null;
 
+let blocksCache = {};
+
 // {
 //     "host": "192.168.1.9",
 //     "port": 1972,
@@ -128,13 +130,20 @@ router.get('/get-blockchain-info', (req, res) => {
 });
 
 router.get('/get-block/:blockhash', (req, res) => {
-    client.getBlock(req.params.blockhash, true)
-        .then(data => {
-            res.status(200).json(data);
-        })
-        .catch(error => {
-            res.status(400).json(error);
-        })
+    const blockHash = req.params.blockhash;
+    if (blockHash in blocksCache) {
+        res.status(200).json(blocksCache[blockHash]);
+    }
+    else {
+        client.getBlock(blockHash, true)
+            .then(data => {
+                blocksCache[blockHash] = data;
+                res.status(200).json(data);
+            })
+            .catch(error => {
+                res.status(400).json(error);
+            })
+    }
 });
 
 router.get('/get-received-by-address/:address', (req, res) => {
