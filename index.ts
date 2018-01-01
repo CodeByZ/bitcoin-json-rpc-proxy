@@ -15,14 +15,6 @@ let client = null;
 const app = express();
 app.use(cors());
 
-function disconnect(): Promise<void> {
-
-    client = null;
-    isConnected = false;
-
-    return Promise.resolve();
-}
-
 function connect(host: string, port: number, username: string, password: string): Promise<string> {
 
     if (isConnected) {
@@ -52,6 +44,19 @@ function connect(host: string, port: number, username: string, password: string)
                 reject(err);
             });
     });
+}
+
+function disconnect(): Promise<void> {
+
+    client = null;
+    isConnected = false;
+
+    return Promise.resolve();
+}
+
+function logError(error: any) {
+
+    console.log('Failed. Reason: ' + error.cause.code);
 }
 
 // configure app to use bodyParser()
@@ -84,14 +89,23 @@ app.use((req, res, next) => {
 const router = express.Router();
 
 router.post('/connect', (req, res) => {
+
     let {host, port, username, password} = req.body;
+
+    console.log('Connecting...');
+
     connect(host, port, username, password)
         .then(message => {
+            console.log('Successfully connected');
             res.status(200).json({message});
         })
         .catch(error => {
+
+            logError(error);
+
             const errCode = error.cause.code;
             let message = '';
+
             if (errCode === 'ECONNRESET') {
                 message = 'Couldn\'t establish connection. Is your full node running?';
             } else if (errCode === 'EHOSTUNREACH') {
@@ -100,59 +114,93 @@ router.post('/connect', (req, res) => {
             else {
                 message = errCode;
             }
+
             res.status(401).json({message});
         });
 });
 
 router.get('/disconnect', (req, res) => {
+
+    console.log('Disconnecting...');
+
     disconnect()
         .then(message => {
+            console.log('Successfully disconnected');
             res.status(200).json({message});
         })
         .catch(error => {
+            logError(error);
             res.status(500).json(error);
         });
 });
 
 router.get('/get-blockchain-info', (req, res) => {
-    client.getBlockchainInfo().then(info => {
-        res.status(200).json(info);
-    });
+
+    console.log('Getting blockchain info...');
+
+    client.getBlockchainInfo()
+        .then(info => {
+            console.log('Success');
+            res.status(200).json(info);
+        })
+        .catch(error => {
+            logError(error);
+            res.status(400).json(error);
+        })
 });
 
 router.get('/get-block/:blockhash', (req, res) => {
-    const blockHash = req.params.blockhash;
-    if (blockHash in blocksCache) {
-        res.status(200).json(blocksCache[blockHash]);
+
+    const blockhash = req.params.blockhash;
+
+    console.log(`Getting block ${blockhash}...`);
+
+    if (blockhash in blocksCache) {
+        console.log('Already in cache');
+        res.status(200).json(blocksCache[blockhash]);
     }
     else {
-        client.getBlock(blockHash, true)
+        client.getBlock(blockhash, true)
             .then(data => {
-                blocksCache[blockHash] = data;
+                console.log('Success');
+                blocksCache[blockhash] = data;
                 res.status(200).json(data);
             })
             .catch(error => {
+                logError(error);
                 res.status(400).json(error);
             })
     }
 });
 
 router.get('/get-block-count', (req, res) => {
+
+    console.log('Getting block count...');
+
     client.getBlockCount()
         .then(data => {
+            console.log('Success');
             res.status(200).json(data);
         })
         .catch(error => {
+            logError(error);
             res.status(400).json(error);
         })
 });
 
 router.get('/get-raw-transaction/:txid', (req, res) => {
-    client.getRawTransaction(req.params.txid, true)
+
+    const txid = req.params.txid;
+
+    console.log(`Getting raw transaction ${txid}`);
+
+    client.getRawTransaction(txid, true)
         .then(data => {
+            console.log('Success');
             res.status(200).json(data);
         })
         .catch(error => {
+            logError(error);
             res.status(400).json(error);
         })
 });
