@@ -1,28 +1,19 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const Client = require('bitcoin-core');
-
-const app = express();
-const cors = require('cors');
+import * as bodyParser from 'body-parser';
+import * as Client from 'bitcoin-core';
+import * as Promise from 'bluebird';
+import * as express from 'express';
+import * as cors from 'cors';
 
 const WELCOME_MESSAGE: string = 'Welcome to the blockchain. Vires in numeris';
-
-app.use(cors());
-
 const port = process.env.PORT || 8080;
 const BASE_HREF = '/api';
 
 let isConnected: boolean = false;
+let blocksCache = {};
 let client = null;
 
-let blocksCache = {};
-
-// {
-//     "host": "192.168.1.9",
-//     "port": 1972,
-//     "username": "bitcoinrpc",
-//     "password": "rpc##PA%%wo1D"
-// }
+const app = express();
+app.use(cors());
 
 function disconnect(): Promise<void> {
 
@@ -69,12 +60,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // error handling middleware
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Error: ' + err.message);
 });
 
-app.use('/api/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.status(200).json({healthy: true});
 });
 
@@ -145,17 +136,6 @@ router.get('/get-block/:blockhash', (req, res) => {
             })
     }
 });
-
-router.get('/get-received-by-address/:address', (req, res) => {
-    client.getReceivedByAddress(req.params.address, true)
-        .then(data => {
-            res.status(200).json(data);
-        })
-        .catch(error => {
-            res.status(400).json(error);
-        })
-});
-
 
 router.get('/get-block-count', (req, res) => {
     client.getBlockCount()
