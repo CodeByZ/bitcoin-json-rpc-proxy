@@ -4,7 +4,7 @@ A simple bitcoin JSON RPC proxy
 
 ### What is This?
 
-This project is a bitcoin node JSON RPC proxy, used by [this frontend Blockchain explorer](https://github.com/CodeByZ/blockchain-explorer).
+This project is a node.js based bitcoin JSON RPC proxy, used by [this frontend Blockchain explorer](https://github.com/CodeByZ/blockchain-explorer).
 
 Note that this proxy needs to communicate with a [Bitcoin Core full node](https://bitcoin.org/en/download) (bitcoind / bitcoin-qt) instance, which you should install on your machine / network.
 
