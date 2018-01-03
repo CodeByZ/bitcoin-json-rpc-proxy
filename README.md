@@ -1,6 +1,6 @@
 # bitcoin-json-rpc-proxy
 
-A simple bitcoin JSON RPC proxy
+A simple bitcoin JSON RPC proxy.
 
 ### What is This?
 
@@ -35,3 +35,14 @@ rpcallowip=127.0.0.1
 * `txindex=1` tells the node to maintain a transactions index. Without it, the node will not index transactions (only blocks) so we won’t be able to run RPC queries to get raw transaction details. If you forget to set this flag before running the node and then want to enable it, then you’ll first need to run the node with the -reindex command line argument to construct the transactions index.
 * `disablewallet=1` tells the node not to provide any wallet management functionality, as we’re only interested in querying the blockchain data for the sake of this exercise.
 * `rpcallowip=127.0.0.1` tells the node to accept incoming connections on the local interface. If you plan to install the proxy on a different machine than the bitcoin core node, you'll need to either set the ip address to your proxy's machine address, *or* add more `rpcallowip` entries (you can add as many as you need), *or* install a local reverse proxy to tunnel requests from all interfaces to the local 127.0.0.1 interface.
+
+### Proxy REST Endpoints
+
+* GET /api/health
+* POST /api/connect
+* GET /api/disconnect
+* GET /api/get-block-count
+* GET /api/get-blockchain-info
+* GET /api/get-block/:blockhash
+* GET /api/get-raw-transaction/:txid
+

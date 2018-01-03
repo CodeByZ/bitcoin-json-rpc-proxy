@@ -1,15 +1,14 @@
 {
     "name": "bitcoin-json-rpc-proxy",
     "author": "Zacky Pickholz <zacky@codebyz.com>",
+    "description": "A simple bitcoin JSON RPC proxy server",
     "version": "1.0.0",
+    "license": "MIT",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
         "postinstall": "node_modules/.bin/tsc"
     },
-    "author": "",
-    "license": "ISC",
-    "description": "",
     "dependencies": {
         "@types/node": "^8.5.2",
         "bitcoin-core": "^2.0.0",
