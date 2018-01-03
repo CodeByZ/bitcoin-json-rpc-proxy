@@ -1,18 +1,23 @@
 {
-  "name": "bitcoin-rpc-http-relay",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@types/node": "^8.5.2",
-    "bitcoin-core": "^2.0.0",
-    "bluebird": "^3.5.1",
-    "cors": "^2.8.4",
-    "express": "^4.16.2"
-  }
+    "name": "bitcoin-json-rpc-proxy",
+    "author": "Zacky Pickholz <zacky@codebyz.com>",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "postinstall": "node_modules/.bin/tsc"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@types/node": "^8.5.2",
+        "bitcoin-core": "^2.0.0",
+        "bluebird": "^3.5.1",
+        "cors": "^2.8.4",
+        "express": "^4.16.2"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.2"
+    }
 }

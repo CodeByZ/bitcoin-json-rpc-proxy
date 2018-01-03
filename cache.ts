@@ -1,0 +1,3 @@
+let blocksCache = {};
+
+export {blocksCache};
